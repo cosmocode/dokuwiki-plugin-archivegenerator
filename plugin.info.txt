@@ -1,0 +1,7 @@
+base   archivegenerator
+author Michael Große
+email  dokuwiki@cosmocode.de
+date   2018-10-08
+name   archivegenerator plugin
+desc   Create a clean copy of your current wiki
+url    https://dokuwiki.org/plugin:archivegenerator
