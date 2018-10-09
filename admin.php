@@ -8,7 +8,6 @@ use splitbrain\PHPArchive\Zip;
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Michael Große <dokuwiki@cosmocode.de>
  */
-
 class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 {
 
@@ -257,7 +256,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         // Simple copy for a file
         if (is_file($source)) {
             if (filesize($source) > 50 * 1024 * 1024) {
-                $this->log('warning', sprintf($this->getLang('message: file is large'), hsc($source)) . ' ' . filesize_h(filesize($source)));
+                $this->log('warning', sprintf($this->getLang('message: file is large'),
+                        hsc($source)) . ' ' . filesize_h(filesize($source)));
             }
 
             $dwPathName = substr($source, strlen(DOKU_INC));
@@ -359,7 +359,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      * @param string $level can be 'error', 'warning' or 'info'
      * @param string $message
      */
-    protected function log($level, $message) {
+    protected function log($level, $message)
+    {
         static $startTime;
         if (!$startTime) {
             $startTime = microtime(true);
@@ -383,7 +384,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         }
 
         msg($timedMessage, $msgLVL);
-        echo str_repeat(' ', 16*1024);
+        echo str_repeat(' ', 16 * 1024);
         flush();
         ob_flush();
     }
