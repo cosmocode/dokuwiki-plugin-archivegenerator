@@ -66,6 +66,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->generateArchive = true;
     }
 
+    /**
+     * Send the existing wiki archive file and exit
+     */
     protected function sendArchiveAndExit()
     {
         global $conf;
@@ -75,6 +78,11 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         exit();
     }
 
+    /**
+     * Build the archive based on the existing wiki
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
+     */
     protected function generateArchive()
     {
         global $conf, $INPUT;
@@ -112,12 +120,27 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->log('success', $this->getLang('message: done') . ' ' . $link);
     }
 
+    /**
+     * Generate a href for a link to download the archive
+     *
+     * @return string
+     */
     protected function getDownloadLinkHref()
     {
         global $INPUT;
         return $INPUT->server->str('REQUEST_URI') . '&downloadArchive=1&sectok=' . getSecurityToken();
     }
 
+    /**
+     * Add an empty directory to the archive.
+     *
+     * The directory will contain a dummy .keep file.
+     *
+     * @param Zip    $archive
+     * @param string $directory path of the directory to add relative to the dokuwiki root
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
+     */
     protected function addEmptyDirToArchive(Zip $archive, $directory)
     {
         $this->log('info', sprintf($this->getLang('message: create empty dir'), $directory));
@@ -125,6 +148,13 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $archive->addData($dirPath, '');
     }
 
+    /**
+     * Create a users.auth.php file with a single admin user
+     *
+     * @param Zip $archive
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
+     */
     protected function addUsersAuthToArchive(Zip $archive)
     {
         global $INPUT;
@@ -151,6 +181,13 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $archive->addData('conf/users.auth.php', $authFile . $adminLine);
     }
 
+    /**
+     * Create an acl.auth.php file that allows reading only for logged-in users
+     *
+     * @param Zip $archive
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
+     */
     protected function addACLToArchive(Zip $archive)
     {
         $this->log('info', $this->getLang('message: create acl'));
@@ -163,6 +200,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     }
 
     /**
+     * Create the archive file
+     *
      * @return Zip
      * @throws \splitbrain\PHPArchive\ArchiveIOException
      */
@@ -175,6 +214,14 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         return $zip;
     }
 
+    /**
+     * Add the contents of an directory to the archive
+     *
+     * @param Zip         $archive
+     * @param string      $srcDir    the directory relative to the dokuwiki root
+     * @param bool        $recursive whether to add subdirectories as well
+     * @param null|string $skipRegex files and directories matching this regex will be ignored. no delimiters
+     */
     protected function addDirToArchive(Zip $archive, $srcDir, $recursive = true, $skipRegex = null)
     {
         $message = [];
@@ -190,11 +237,23 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->addFilesToArchive(DOKU_INC . $srcDir, $archive, !$recursive, $skipRegex);
     }
 
+    /**
+     * Recursive method to add files and directories to a archive
+     *
+     * It will report large files that might cause the process to fail.
+     *
+     * @param string $source
+     * @param Zip    $archive
+     * @param bool   $filesOnly
+     * @param null   $skipRegex
+     *
+     * @return bool
+     */
     protected function addFilesToArchive($source, Zip $archive, $filesOnly = false, $skipRegex = null)
     {
         // Simple copy for a file
         if (is_file($source)) {
-            if (filesize($source) > 50000000) {
+            if (filesize($source) > 50 * 1024 * 1024) {
                 $this->log('warning', sprintf($this->getLang('message: file is large'), hsc($source)) . ' ' . filesize_h(filesize($source)));
             }
 
@@ -250,7 +309,6 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         }
     }
 
-
     protected function showForm()
     {
         global $conf;
@@ -286,6 +344,14 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         echo $form->toHTML();
     }
 
+    /**
+     * Print a message to the user, prefixes the time since the first message
+     *
+     * This adds whitespace padding to force the message being printed immediately.
+     *
+     * @param string $level can be 'error', 'warning' or 'info'
+     * @param string $message
+     */
     protected function log($level, $message) {
         static $startTime;
         if (!$startTime) {
