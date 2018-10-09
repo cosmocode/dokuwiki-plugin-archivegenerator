@@ -221,6 +221,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      * @param string      $srcDir    the directory relative to the dokuwiki root
      * @param bool        $recursive whether to add subdirectories as well
      * @param null|string $skipRegex files and directories matching this regex will be ignored. no delimiters
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
      */
     protected function addDirToArchive(Zip $archive, $srcDir, $recursive = true, $skipRegex = null)
     {
@@ -248,6 +250,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      * @param null   $skipRegex
      *
      * @return bool
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
      */
     protected function addFilesToArchive($source, Zip $archive, $filesOnly = false, $skipRegex = null)
     {
@@ -262,7 +265,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
                 $archive->addFile($source, $dwPathName);
             } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
                 $this->log('error', hsc($e->getMessage()));
-                return false;
+                throw $e;
             }
             return true;
         }
@@ -303,10 +306,14 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         echo $this->locale_xhtml('intro');
 
         if ($this->generateArchive) {
-            $this->generateArchive();
-        } else {
-            $this->showForm();
+            try {
+                $this->generateArchive();
+                return;
+            } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
+                msg(hsc($e->getMessage()), -1);
+            }
         }
+        $this->showForm();
     }
 
     protected function showForm()
