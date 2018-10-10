@@ -128,8 +128,13 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      */
     protected function getDownloadLinkHref()
     {
-        global $INPUT;
-        return $INPUT->server->str('REQUEST_URI') . '&downloadArchive=1&sectok=' . getSecurityToken();
+        global $ID, $INPUT;
+        return wl($ID,[
+            'do' => 'admin',
+            'page' => 'archivegenerator',
+            'downloadArchive' => 1,
+            'sectok' => getSecurityToken(),
+        ]);
     }
 
     /**
