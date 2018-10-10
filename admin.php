@@ -94,10 +94,11 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->addDirToArchive($archive, 'inc');
         $this->addDirToArchive($archive, 'bin');
         $this->addDirToArchive($archive, 'vendor');
-        $this->addDirToArchive($archive, 'conf', true, '(^users\.auth\.php$|^acl\.auth\.php$)');
+        $this->addDirToArchive($archive, 'conf', true, '^conf/(users\.auth\.php|acl\.auth\.php)$');
         $this->addUsersAuthToArchive($archive);
         $this->addACLToArchive($archive);
-        $this->addDirToArchive($archive, 'lib', true, $this->buildSkipPluinRegex());
+        $this->addDirToArchive($archive, 'lib', true, '^lib/plugins$');
+        $this->addDirToArchive($archive, 'lib/plugins', true, $this->buildSkipPluinRegex());
         $this->addDirToArchive($archive, 'data/pages');
         $this->addDirToArchive($archive, 'data/meta', true, '\.changes(\.trimmed)?$');
         $this->addDirToArchive($archive, 'data/media');
@@ -121,10 +122,15 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->log('success', $this->getLang('message: done') . ' ' . $link);
     }
 
+    /**
+     * Build a regex for the plugins to skip, relative to the DokuWiki root
+     *
+     * @return string
+     */
     protected function buildSkipPluinRegex()
     {
         $list = array_map('trim', explode(',', $this->getConf('pluginsToIgnore')));
-        return '^' . implode('$|^', $list) . '$';
+        return '^lib/plugins/(' . implode('|', $list) . ')$';
     }
 
     /**
@@ -273,9 +279,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
                         hsc($source)) . ' ' . filesize_h(filesize($source)));
             }
 
-            $dwPathName = substr($source, strlen(DOKU_INC));
             try {
-                $archive->addFile($source, $dwPathName);
+                $archive->addFile($source, $this->getDWPathName($source));
             } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
                 $this->log('error', hsc($e->getMessage()));
                 throw $e;
@@ -289,12 +294,12 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
             if (in_array($entry, ['.', '..', '.git', 'node_modules'])) {
                 continue;
             }
+            $srcFN = "$source/$entry";
 
-            if ($skipRegex && preg_match("/$skipRegex/", $entry)) {
+            if ($skipRegex && preg_match("#$skipRegex#", $this->getDWPathName($srcFN))) {
                 continue;
             }
 
-            $srcFN = "$source/$entry";
             if (is_dir($srcFN) && $filesOnly) {
                 continue;
             }
@@ -308,6 +313,18 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         // Clean up
         $dir->close();
         return true;
+    }
+
+    /**
+     * Get the filepath relative to the dokuwiki root
+     *
+     * @param $filepath
+     *
+     * @return string
+     */
+    protected function getDWPathName($filepath)
+    {
+        return substr($filepath, strlen(DOKU_INC));
     }
 
     /**
