@@ -411,8 +411,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 
         msg($timedMessage, $msgLVL);
         echo str_repeat(' ', 16 * 1024);
-        flush();
-        ob_flush();
+        tpl_flush();
     }
 }
 
