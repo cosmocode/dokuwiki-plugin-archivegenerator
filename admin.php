@@ -347,6 +347,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->showForm();
     }
 
+    /**
+     * Show the default form
+     */
     protected function showForm()
     {
         global $conf;
