@@ -8,7 +8,7 @@ Please provide email and password for that admin user below.
 The wiki will have a minimal set of ACL rules.
 
 Besides ACL and users, the wiki will include all configuration and all templates and all plugins.
-However, you can remove plugins with the regex below.
+However, you can remove plugins in the configuration.
 The current plugin is already preconfigured.
 
 If an archive already exists, you can download it below.
