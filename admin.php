@@ -97,7 +97,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->addDirToArchive($archive, 'conf', true, '(^users\.auth\.php$|^acl\.auth\.php$)');
         $this->addUsersAuthToArchive($archive);
         $this->addACLToArchive($archive);
-        $this->addDirToArchive($archive, 'lib', true, $INPUT->post->str('skipPluginsRegex'));
+        $this->addDirToArchive($archive, 'lib', true, $this->buildSkipPluinRegex());
         $this->addDirToArchive($archive, 'data/pages');
         $this->addDirToArchive($archive, 'data/meta', true, '\.changes(\.trimmed)?$');
         $this->addDirToArchive($archive, 'data/media');
@@ -119,6 +119,12 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $href = $this->getDownloadLinkHref();
         $link = "<a href=\"$href\">" . $this->getLang('link: download now') . '</a>';
         $this->log('success', $this->getLang('message: done') . ' ' . $link);
+    }
+
+    protected function buildSkipPluinRegex()
+    {
+        $list = array_map('trim', explode(',', $this->getConf('pluginsToIgnore')));
+        return '^' . implode('$|^', $list) . '$';
     }
 
     /**
@@ -347,10 +353,6 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $adminPassInput = $form->addPasswordInput('adminPass', $this->getLang('label: admin pass'));
         $adminPassInput->addClass('block');
         $adminPassInput->attr('required', 1);
-
-        $skipPluginsInput = $form->addTextInput('skipPluginsRegex', $this->getLang('label: plugin skip regex'));
-        $skipPluginsInput->val('^archivegenerator$');
-        $skipPluginsInput->addClass('block');
 
         $form->addButton('submit', $this->getLang('button: generate archive'));
 

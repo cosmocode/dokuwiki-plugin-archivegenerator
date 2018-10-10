@@ -11,7 +11,6 @@ $lang['menu'] = 'Generate Archive Wiki';
 // custom language strings for the plugin
 $lang['label: admin mail'] = 'E-Mail address of generated archive admin';
 $lang['label: admin pass'] = 'Password of generated archive admin';
-$lang['label: plugin skip regex'] = 'Regex definig which plugins to skip';
 $lang['button: generate archive'] = 'Generate Archive Wiki';
 
 $lang['message: archive exists'] = 'An archive created at %s already exists.';
