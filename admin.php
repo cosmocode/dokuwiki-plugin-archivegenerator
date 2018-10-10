@@ -90,6 +90,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->log('info', $this->getLang('message: starting'));
         $tmpArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive_new.zip';
         $archive = $this->createZipArchive($tmpArchiveFN);
+        set_time_limit(0);
         $this->addDirToArchive($archive, '.', false);
         $this->addDirToArchive($archive, 'inc');
         $this->addDirToArchive($archive, 'bin');
