@@ -72,7 +72,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     {
         global $conf;
         $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
+        header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="archive.zip"');
+        http_sendfile($persistentArchiveFN);
         readfile($persistentArchiveFN);
         exit();
     }
