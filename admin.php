@@ -36,7 +36,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     {
         global $INPUT;
 
-        if ($INPUT->bool('downloadArchive') && checkSecurityToken($INPUT->str('sectok'))) {
+        if ($INPUT->bool('downloadArchive') && checkSecurityToken()) {
             $this->sendArchiveAndExit();
         }
 
