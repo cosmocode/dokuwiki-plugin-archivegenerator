@@ -13,25 +13,19 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 
     protected $generateArchive = false;
 
-    /**
-     * @return int sort number in admin menu
-     */
+    /** @inheritdoc */
     public function getMenuSort()
     {
         return 123;
     }
 
-    /**
-     * @return bool true if only access for superuser, false is for superusers and moderators
-     */
+    /** @inheritdoc */
     public function forAdminOnly()
     {
         return true;
     }
 
-    /**
-     * Should carry out any processing required by the plugin.
-     */
+    /** @inheritdoc */
     public function handle()
     {
         global $INPUT;
@@ -106,7 +100,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      */
     protected function generateArchive()
     {
-        global $conf, $INPUT;
+        global $conf;
         $this->log('info', $this->getLang('message: starting'));
         $tmpArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive_new.zip';
         $archive = $this->createZipArchive($tmpArchiveFN);
@@ -164,8 +158,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      */
     protected function getDownloadLinkHref()
     {
-        global $ID, $INPUT;
-        return wl($ID,[
+        global $ID;
+        return wl($ID, [
             'do' => 'admin',
             'page' => 'archivegenerator',
             'downloadArchive' => 1,
@@ -192,7 +186,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      *
      * The directory will contain a dummy .keep file.
      *
-     * @param Zip    $archive
+     * @param Zip $archive
      * @param string $directory path of the directory to add relative to the dokuwiki root
      *
      * @throws \splitbrain\PHPArchive\ArchiveIOException
@@ -274,9 +268,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     /**
      * Add the contents of an directory to the archive
      *
-     * @param Zip         $archive
-     * @param string      $srcDir    the directory relative to the dokuwiki root
-     * @param bool        $recursive whether to add subdirectories as well
+     * @param Zip $archive
+     * @param string $srcDir the directory relative to the dokuwiki root
+     * @param bool $recursive whether to add subdirectories as well
      * @param null|string $skipRegex files and directories matching this regex will be ignored. no delimiters
      *
      * @throws \splitbrain\PHPArchive\ArchiveIOException
@@ -302,9 +296,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      * It will report large files that might cause the process to fail.
      *
      * @param string $source
-     * @param Zip    $archive
-     * @param bool   $filesOnly
-     * @param null   $skipRegex
+     * @param Zip $archive
+     * @param bool $filesOnly
+     * @param null $skipRegex
      *
      * @return bool
      * @throws \splitbrain\PHPArchive\ArchiveIOException
@@ -445,7 +439,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         /** @noinspection MissingOrEmptyGroupStatementInspection */
         /** @noinspection LoopWhichDoesNotLoopInspection */
         /** @noinspection PhpStatementHasEmptyBodyInspection */
-        while(@ob_end_flush()){
+        while (@ob_end_flush()) {
         };
         flush();
     }
