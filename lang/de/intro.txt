@@ -1,0 +1,10 @@
+Dieses Werkzeug exportiert ein ZIP Archiv des aktuellen Wikis mit den aktuellen Inhalten.
+Das Archiv wird keine altern Seiten- oder Medienversionen, Änderungslogs oder Cache-Daten enthalten.
+
+Es werden keine Nutzer oder ACLs in das Archiv kopiert. Stattdessen werden minimale ACLs (für ein geschlossenes Wiki)
+und ein einzelner ''admin'' Nutzer erzeugt. Bitte geben Sie E-Mail-Adresse und Passwort für diesen neuen Nutzer an.
+
+Außer den oben erwähnten ausgelassenen Daten werden alle Konfigurationen, Templates und installierte Plugins in das
+Archiv übernommen. Sie können einzelne Plugins über die Konfiguration ausschließen.
+
+Ein neu erzeugtes Archiv überschreibt ein eventuell bereits vorhandenes.

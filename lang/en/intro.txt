@@ -2,9 +2,9 @@ This interface generates a ZIP archive of the current wiki with the current cont
 This archive will not include old revisions of pages and media files, changelogs or cache data.
 
 There will be no users or ACLs be copied to the archive. Instead a basic (closed wiki) ACL and a single
-''admin'' user is craqted. Please provide email and password for that admin user below.
+''admin'' user is created. Please provide email and password for that admin user below.
 
 Besides the mentioned ommitted data, the archive will include all configuration, templates and installed plugins.
 You can exclude plugins from being included through the configuration.
 
-If an archive already exists, you can download it below. Generating a new archive will replace the existing one.
+Generating a new archive will replace a potentially existing one.
