@@ -227,6 +227,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     protected function createZipArchive($archiveFN)
     {
         $this->log('info', sprintf($this->getLang('message: create zip archive'), hsc($archiveFN)));
+        io_makeFileDir($archiveFN);
         $zip = new Zip();
         $zip->create($archiveFN);
 
