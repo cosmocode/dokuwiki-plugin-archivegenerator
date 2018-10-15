@@ -6,12 +6,14 @@
  */
 
 // menu entry for admin plugins
-$lang['menu'] = 'Generate Archive Wiki';
+$lang['menu'] = 'Generate Wiki Archive';
+
 
 // custom language strings for the plugin
 $lang['label: admin mail'] = 'E-Mail address of generated archive admin';
 $lang['label: admin pass'] = 'Password of generated archive admin';
-$lang['button: generate archive'] = 'Generate Archive Wiki';
+$lang['button: generate archive'] = 'Generate Wiki Archive';
+$lang['label: download'] = 'Download Wiki Archive';
 
 $lang['message: archive exists'] = 'An archive created at %s already exists.';
 $lang['message: password empty'] = 'Password must not be empty!';

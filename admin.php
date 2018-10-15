@@ -65,6 +65,26 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->generateArchive = true;
     }
 
+    /** @inheritdoc */
+    public function html()
+    {
+        $this->downloadView();
+
+
+        ptln('<h1>' . $this->getLang('menu') . '</h1>');
+        echo $this->locale_xhtml('intro');
+
+        if ($this->generateArchive) {
+            try {
+                $this->generateArchive();
+                return;
+            } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
+                msg(hsc($e->getMessage()), -1);
+            }
+        }
+        $this->showForm();
+    }
+
     /**
      * Send the existing wiki archive file and exit
      */
@@ -330,22 +350,22 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     }
 
     /**
-     * Render HTML output, e.g. helpful text and a form
+     * Display the download info
      */
-    public function html()
+    protected function downloadView()
     {
-        ptln('<h1>' . $this->getLang('menu') . '</h1>');
-        echo $this->locale_xhtml('intro');
+        global $conf;
 
-        if ($this->generateArchive) {
-            try {
-                $this->generateArchive();
-                return;
-            } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
-                msg(hsc($e->getMessage()), -1);
-            }
-        }
-        $this->showForm();
+        $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
+        if (!file_exists($persistentArchiveFN)) return;
+
+        ptln('<h1>' . $this->getLang('label: download') . '</h1>');
+
+        $mtime = dformat(filemtime($persistentArchiveFN));
+        $href = $this->getDownloadLinkHref();
+
+        ptln('<p>' . sprintf($this->getLang('message: archive exists'), $mtime) . '</p>');
+        ptln("<p><a href=\"$href\">" . $this->getLang('link: download now') . '</a></p>');
     }
 
     /**
@@ -353,18 +373,6 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      */
     protected function showForm()
     {
-        global $conf;
-
-        $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
-        if (file_exists($persistentArchiveFN)) {
-            $mtime = dformat(filemtime($persistentArchiveFN));
-            $href = $this->getDownloadLinkHref();
-            $link = "<a href=\"$href\">" . $this->getLang('link: download now') . '</a>';
-
-            $message = sprintf($this->getLang('message: archive exists'), $mtime) . ' ' . $link;
-            msg($message, 2);
-        }
-
         $form = new \dokuwiki\Form\Form();
         $form->addFieldsetOpen();
 
