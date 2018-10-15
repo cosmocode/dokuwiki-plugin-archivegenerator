@@ -1,15 +1,10 @@
-This interface generates a copy of the current wiki with the current content.
-This archive will not include old revisions of pages and media files, changelogs or cache data;
+This interface generates a ZIP archive of the current wiki with the current content.
+This archive will not include old revisions of pages and media files, changelogs or cache data.
 
-Further, it will not contain the current set of users.
-It will contain a single **''admin''** user.
-Please provide email and password for that admin user below.
+There will be no users or ACLs be copied to the archive. Instead a basic (closed wiki) ACL and a single
+''admin'' user is craqted. Please provide email and password for that admin user below.
 
-The wiki will have a minimal set of ACL rules.
+Besides the mentioned ommitted data, the archive will include all configuration, templates and installed plugins.
+You can exclude plugins from being included through the configuration.
 
-Besides ACL and users, the wiki will include all configuration and all templates and all plugins.
-However, you can remove plugins in the configuration.
-The current plugin is already preconfigured.
-
-If an archive already exists, you can download it below.
-Generating a new archive will replace the existing one.
+If an archive already exists, you can download it below. Generating a new archive will replace the existing one.
