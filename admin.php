@@ -12,6 +12,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 {
 
     protected $generateArchive = false;
+    protected $base = 'dokuwiki/';
 
     /** @inheritdoc */
     public function getMenuSort()
@@ -194,7 +195,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     protected function addEmptyDirToArchive(Zip $archive, $directory)
     {
         $this->log('info', sprintf($this->getLang('message: create empty dir'), $directory));
-        $dirPath = $directory . '/.keep';
+        $dirPath = $this->base . $directory . '/.keep';
         $archive->addData($dirPath, '');
     }
 
@@ -228,7 +229,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 
         $pwHash = auth_cryptPassword($pass);
         $adminLine = "admin:$pwHash:Administrator:$email:users,admin\n";
-        $archive->addData('conf/users.auth.php', $authFile . $adminLine);
+        $archive->addData($this->base . 'conf/users.auth.php', $authFile . $adminLine);
     }
 
     /**
@@ -246,7 +247,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 *  @ALL   0
 *  @users 1
 ';
-        $archive->addData('conf/acl.auth.php', $aclFileContents);
+        $archive->addData($this->base . 'conf/acl.auth.php', $aclFileContents);
     }
 
     /**
@@ -357,7 +358,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      */
     protected function getDWPathName($filepath)
     {
-        return substr($filepath, strlen(DOKU_INC));
+        return $this->base . substr($filepath, strlen(DOKU_INC));
     }
 
     /**
