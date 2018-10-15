@@ -68,13 +68,13 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     /** @inheritdoc */
     public function html()
     {
-        $this->downloadView();
+        if (!$this->generateArchive) {
+            $this->downloadView();
 
-
-        ptln('<h1>' . $this->getLang('menu') . '</h1>');
-        echo $this->locale_xhtml('intro');
-
-        if ($this->generateArchive) {
+            ptln('<h1>' . $this->getLang('menu') . '</h1>');
+            echo $this->locale_xhtml('intro');
+        } else {
+            ptln('<h1>' . $this->getLang('menu') . '</h1>');
             try {
                 $this->generateArchive();
                 return;
@@ -141,6 +141,9 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $href = $this->getDownloadLinkHref();
         $link = "<a href=\"$href\">" . $this->getLang('link: download now') . '</a>';
         $this->log('success', $this->getLang('message: done') . ' ' . $link);
+
+        // try a redirect to self
+        ptln('<script type="text/javascript">window.location.href=\'' . $this->getSelfRedirect() . '\';</script>');
     }
 
     /**
@@ -168,6 +171,20 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
             'downloadArchive' => 1,
             'sectok' => getSecurityToken(),
         ]);
+    }
+
+    /**
+     * Generate the link to the admin page itself
+     *
+     * @return string
+     */
+    protected function getSelfRedirect()
+    {
+        global $ID;
+        return wl($ID, [
+            'do' => 'admin',
+            'page' => 'archivegenerator',
+        ],false, '&');
     }
 
     /**
