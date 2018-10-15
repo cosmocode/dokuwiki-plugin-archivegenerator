@@ -110,11 +110,11 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->addDirToArchive($archive, 'inc');
         $this->addDirToArchive($archive, 'bin');
         $this->addDirToArchive($archive, 'vendor');
-        $this->addDirToArchive($archive, 'conf', true, '^conf/(users\.auth\.php|acl\.auth\.php)$');
+        $this->addDirToArchive($archive, 'conf', true, '^' . $this->base . 'conf/(users\.auth\.php|acl\.auth\.php)$');
         $this->addUsersAuthToArchive($archive);
         $this->addACLToArchive($archive);
-        $this->addDirToArchive($archive, 'lib', true, '^lib/plugins$');
-        $this->addDirToArchive($archive, 'lib/plugins', true, $this->buildSkipPluinRegex());
+        $this->addDirToArchive($archive, 'lib', true, '^' . $this->base . 'lib/plugins$');
+        $this->addDirToArchive($archive, 'lib/plugins', true, $this->buildSkipPluginRegex());
         $this->addDirToArchive($archive, 'data/pages');
         $this->addDirToArchive($archive, 'data/meta', true, '\.changes(\.trimmed)?$');
         $this->addDirToArchive($archive, 'data/media');
@@ -146,10 +146,10 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
      *
      * @return string
      */
-    protected function buildSkipPluinRegex()
+    protected function buildSkipPluginRegex()
     {
         $list = array_map('trim', explode(',', $this->getConf('pluginsToIgnore')));
-        return '^lib/plugins/(' . implode('|', $list) . ')$';
+        return '^' . $this->base . 'lib/plugins/(' . implode('|', $list) . ')$';
     }
 
     /**
@@ -179,7 +179,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         return wl($ID, [
             'do' => 'admin',
             'page' => 'archivegenerator',
-        ],false, '&');
+        ], false, '&');
     }
 
     /**
