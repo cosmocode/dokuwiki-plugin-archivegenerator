@@ -416,7 +416,13 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 
         msg($timedMessage, $msgLVL);
         echo str_repeat(' ', 16 * 1024);
-        tpl_flush();
+
+        /** @noinspection MissingOrEmptyGroupStatementInspection */
+        /** @noinspection LoopWhichDoesNotLoopInspection */
+        /** @noinspection PhpStatementHasEmptyBodyInspection */
+        while(@ob_end_flush()){
+        };
+        flush();
     }
 }
 
