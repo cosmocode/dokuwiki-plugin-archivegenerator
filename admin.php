@@ -228,7 +228,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         ';
 
         $pwHash = auth_cryptPassword($pass);
-        $adminLine = "admin:$pwHash:Administrator:$email:users,admin\n";
+        $adminLine = "admin:$pwHash:Administrator:$email:user,admin\n";
         $archive->addData($this->base . 'conf/users.auth.php', $authFile . $adminLine);
     }
 
