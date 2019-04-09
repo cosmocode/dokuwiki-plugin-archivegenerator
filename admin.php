@@ -12,6 +12,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 {
 
     protected $generateArchive = false;
+    protected $type = 'full';
     protected $base = 'dokuwiki/';
 
     /** @inheritdoc */
@@ -31,6 +32,8 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     {
         global $INPUT;
 
+        if ($INPUT->bool('isupdate')) $this->type = 'update';
+
         if ($INPUT->bool('downloadArchive') && checkSecurityToken()) {
             $this->sendArchiveAndExit();
         }
@@ -44,17 +47,21 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         if (!checkSecurityToken($sectok)) {
             return;
         }
-        $email = $INPUT->post->str('adminMail');
-        $pass = $INPUT->post->str('adminPass');
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            msg(sprintf($this->getLang('message: email invalid'), hsc($email)), -1);
-            return;
-        }
+        // check for email and pass on full archives only
+        if ($this->type == 'full') {
+            $email = $INPUT->post->str('adminMail');
+            $pass = $INPUT->post->str('adminPass');
 
-        if (empty($pass)) {
-            msg($this->getLang('message: password empty'), -1);
-            return;
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                msg(sprintf($this->getLang('message: email invalid'), hsc($email)), -1);
+                return;
+            }
+
+            if (empty($pass)) {
+                msg($this->getLang('message: password empty'), -1);
+                return;
+            }
         }
 
         $this->generateArchive = true;
@@ -71,13 +78,18 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         } else {
             ptln('<h1>' . $this->getLang('menu') . '</h1>');
             try {
-                $this->generateArchive();
+                if ($this->type == 'full') {
+                    $this->generateArchive();
+                } else {
+                    $this->generateUpdateArchive();
+                }
                 return;
             } catch (\splitbrain\PHPArchive\ArchiveIOException $e) {
                 msg(hsc($e->getMessage()), -1);
             }
         }
-        $this->showForm();
+        $this->showFullForm();
+        $this->showUpdateForm();
     }
 
     /**
@@ -86,7 +98,11 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     protected function sendArchiveAndExit()
     {
         global $conf;
-        $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
+        if ($this->type == 'full') {
+            $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
+        } else {
+            $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive-update.zip';
+        }
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="archive.zip"');
         http_sendfile($persistentArchiveFN);
@@ -142,6 +158,51 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     }
 
     /**
+     * Build an update archive based on the existing wiki
+     *
+     * @throws \splitbrain\PHPArchive\ArchiveIOException
+     */
+    protected function generateUpdateArchive()
+    {
+        global $conf;
+        $this->log('info', $this->getLang('message: starting'));
+        $tmpArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive-update_new.zip';
+        $archive = $this->createZipArchive($tmpArchiveFN);
+        set_time_limit(0);
+        $this->addDirToArchive($archive, '.', false);
+        $this->addDirToArchive($archive, 'inc');
+        $this->addDirToArchive($archive, 'bin');
+        $this->addDirToArchive($archive, 'vendor');
+        $this->addDirToArchive($archive, 'conf', true, '^' . $this->base . 'conf/(users\.auth\.php|acl\.auth\.php|.*local\.(php|conf))$');
+        $this->addDirToArchive($archive, 'lib', true, '^' . $this->base . 'lib/plugins$');
+        $this->addDirToArchive($archive, 'lib/plugins', true, $this->buildSkipPluginRegex());
+
+        $this->addEmptyDirToArchive($archive, 'data/pages');
+        $this->addEmptyDirToArchive($archive, 'data/media');
+        $this->addEmptyDirToArchive($archive, 'data/index');
+        $this->addEmptyDirToArchive($archive, 'data/media_meta');
+        $this->addEmptyDirToArchive($archive, 'data/meta');
+        $this->addEmptyDirToArchive($archive, 'data/attic');
+        $this->addEmptyDirToArchive($archive, 'data/cache');
+        $this->addEmptyDirToArchive($archive, 'data/locks');
+        $this->addEmptyDirToArchive($archive, 'data/tmp');
+        $this->addEmptyDirToArchive($archive, 'data/media_attic');
+
+        $archive->close();
+        $this->log('info', $this->getLang('message: adding data done'));
+
+        $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive-update.zip';
+        io_rename($tmpArchiveFN, $persistentArchiveFN);
+
+        $href = $this->getDownloadLinkHref('update');
+        $link = "<a href=\"$href\">" . $this->getLang('link: download now') . '</a>';
+        $this->log('success', $this->getLang('message: done') . ' ' . $link);
+
+        // try a redirect to self
+        ptln('<script type="text/javascript">window.location.href=\'' . $this->getSelfRedirect() . '\';</script>');
+    }
+
+    /**
      * Build a regex for the plugins to skip, relative to the DokuWiki root
      *
      * @return string
@@ -155,9 +216,10 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     /**
      * Generate a href for a link to download the archive
      *
+     * @param string $type
      * @return string
      */
-    protected function getDownloadLinkHref()
+    protected function getDownloadLinkHref($type = 'full')
     {
         global $ID;
         return wl($ID, [
@@ -165,6 +227,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
             'page' => 'archivegenerator',
             'downloadArchive' => 1,
             'sectok' => getSecurityToken(),
+            'isupdate' => (int)($type == 'update'),
         ]);
     }
 
@@ -368,25 +431,40 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
     {
         global $conf;
 
-        $persistentArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
-        if (!file_exists($persistentArchiveFN)) return;
+        $fullArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive.zip';
+        $updateArchiveFN = $conf['tmpdir'] . '/archivegenerator/archive-update.zip';
+        if (!file_exists($fullArchiveFN) && !file_exists($updateArchiveFN)) return;
 
         ptln('<h1>' . $this->getLang('label: download') . '</h1>');
 
-        $mtime = dformat(filemtime($persistentArchiveFN));
-        $href = $this->getDownloadLinkHref();
+        if (file_exists($fullArchiveFN)) {
+            $mtime = dformat(filemtime($fullArchiveFN));
+            $href = $this->getDownloadLinkHref();
+            ptln('<p>');
+            ptln('<b>' . $this->getLang('label: full archive') . '</b><br>');
+            ptln(sprintf($this->getLang('message: archive exists'), $mtime));
+            ptln("<a href=\"$href\">" . $this->getLang('link: download now') . '</a>');
+            ptln('</p>');
+        }
 
-        ptln('<p>' . sprintf($this->getLang('message: archive exists'), $mtime) . '</p>');
-        ptln("<p><a href=\"$href\">" . $this->getLang('link: download now') . '</a></p>');
+        if (file_exists($updateArchiveFN)) {
+            $mtime = dformat(filemtime($updateArchiveFN));
+            $href = $this->getDownloadLinkHref('update');
+            ptln('<p>');
+            ptln('<b>' . $this->getLang('label: update archive') . '</b><br>');
+            ptln(sprintf($this->getLang('message: archive exists'), $mtime));
+            ptln("<a href=\"$href\">" . $this->getLang('link: download now') . '</a>');
+            ptln('</p>');
+        }
     }
 
     /**
-     * Show the default form
+     * Show the form to create a full archive
      */
-    protected function showForm()
+    protected function showFullForm()
     {
         $form = new \dokuwiki\Form\Form();
-        $form->addFieldsetOpen();
+        $form->addFieldsetOpen($this->getLang('label: full archive'));
 
         $adminMailInput = $form->addTextInput('adminMail', $this->getLang('label: admin mail'));
         $adminMailInput->addClass('block');
@@ -395,6 +473,22 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $adminPassInput = $form->addPasswordInput('adminPass', $this->getLang('label: admin pass'));
         $adminPassInput->addClass('block');
         $adminPassInput->attr('required', 1);
+
+        $form->addButton('submit', $this->getLang('button: generate archive'));
+
+        $form->addFieldsetClose();
+        echo $form->toHTML();
+    }
+
+    /**
+     * Show the form to create a full archive
+     */
+    protected function showUpdateForm()
+    {
+        $form = new \dokuwiki\Form\Form();
+        $form->addFieldsetOpen($this->getLang('label: update archive'));
+
+        $form->setHiddenField('isupdate', '1');
 
         $form->addButton('submit', $this->getLang('button: generate archive'));
 

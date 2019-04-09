@@ -15,6 +15,9 @@ $lang['label: admin pass'] = 'Password of generated archive admin';
 $lang['button: generate archive'] = 'Generate Wiki Archive';
 $lang['label: download'] = 'Download Wiki Archive';
 
+$lang['label: full archive'] = 'Full Archive';
+$lang['label: update archive'] = 'Update Archive';
+
 $lang['message: archive exists'] = 'The wiki archive was last created at %s.';
 $lang['message: password empty'] = 'Password must not be empty!';
 $lang['message: email invalid'] = 'Entered eMail "%s" is not valid!';
