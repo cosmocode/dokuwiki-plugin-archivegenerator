@@ -139,6 +139,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
 
         $this->addEmptyDirToArchive($archive, 'data/attic');
         $this->addEmptyDirToArchive($archive, 'data/cache');
+        $this->addEmptyDirToArchive($archive, 'data/log');
         $this->addEmptyDirToArchive($archive, 'data/locks');
         $this->addEmptyDirToArchive($archive, 'data/tmp');
         $this->addEmptyDirToArchive($archive, 'data/media_attic');
@@ -184,6 +185,7 @@ class admin_plugin_archivegenerator extends DokuWiki_Admin_Plugin
         $this->addEmptyDirToArchive($archive, 'data/meta');
         $this->addEmptyDirToArchive($archive, 'data/attic');
         $this->addEmptyDirToArchive($archive, 'data/cache');
+        $this->addEmptyDirToArchive($archive, 'data/log');
         $this->addEmptyDirToArchive($archive, 'data/locks');
         $this->addEmptyDirToArchive($archive, 'data/tmp');
         $this->addEmptyDirToArchive($archive, 'data/media_attic');
